@@ -1,7 +1,10 @@
 FROM golang:1.21 as build
 
+ENV BUILD_MODE=true
+
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
+
 RUN go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
 WORKDIR /app
@@ -12,10 +15,12 @@ RUN go mod download
 
 COPY . .
 
-RUN wails dev
+RUN wails build -tags production
 
 # Stage 2: Create a lightweight image to run the application
 FROM debian:bullseye-slim
+
+ENV BUILD_MODE=false
 
 # Install any necessary dependencies (adjust as needed)
 RUN apt-get update && apt-get install -y \

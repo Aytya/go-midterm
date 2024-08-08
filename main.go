@@ -168,6 +168,11 @@ func initConfig() error {
 }
 
 func initDB() (*sqlx.DB, error) {
+	if os.Getenv("BUILD_MODE") == "true" {
+		// Skip database initialization during build
+		return nil, nil
+	}
+
 	dsn := "host=" + os.Getenv("DB_HOST") +
 		" port=" + os.Getenv("DB_PORT") +
 		" user=" + os.Getenv("DB_USER") +

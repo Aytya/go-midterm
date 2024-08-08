@@ -1,15 +1,6 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    env_file:
-      - .env
-
   db:
     restart: always
     container_name: db-myproject
@@ -21,7 +12,17 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - 5436:5432
+      - 5438:${DB_PORT}
+
+  app:
+    build: .
+    ports:
+      - "5174:5174"
+      - "8080:8080"
+    depends_on:
+      - db
+    env_file:
+      - .env
 
 volumes:
   db-data:
