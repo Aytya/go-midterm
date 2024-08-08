@@ -6,7 +6,8 @@
 
 ### Prerequisites:
     - Go 1.22 or later
-    - Docker
+    - React 18.2.0 or later
+
 ### Installation:
 1. Clone the repository:
    ```bash
