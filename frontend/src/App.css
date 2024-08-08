@@ -21,7 +21,7 @@ body {
 h1 {
     color: #fff;
     margin-bottom: 0.5rem;
-    font-size: 1.75rem;
+    font-size: 2.2rem;
 }
 
 .TodoWrapper {
@@ -38,6 +38,10 @@ h1 {
 }
 
 .todo-input {
+    width: 300px;
+}
+
+.todo-input, .todo-input-data, .todo-input-time{
     border-radius: 0.5rem;
     outline: none;
     background: none;
@@ -45,10 +49,24 @@ h1 {
     padding: 0.5rem 1rem;
     margin-top: 1rem;
     margin-bottom: 2rem;
-    width: 300px;
     height: 40px;
     color: white;
     font-size: 15px;
+}
+
+.Todo div span {
+    margin-right: 10px;
+}
+
+.todo-input-time{
+    margin-right: 0.3rem;
+    width: 150px;
+}
+
+.todo-input-data {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    width: 170px;
 }
 
 .todo-input::placeholder {
@@ -92,6 +110,11 @@ h1 {
     cursor: pointer;
 }
 
+.completed-task {
+    background: #6a38ff;
+}
+
+
 .edit-icon,
 .delete-icon {
     cursor: pointer;
@@ -103,4 +126,37 @@ h1 {
 
 .fa-pen{
     width: 17px;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.close-btn{
+    background-color: darkred;
+    border-radius: 0.5rem;
+    margin: 0.5rem;
+    padding: 0.2rem 1rem;
+    color: white;
+}
+
+.active-task, .complete-task {
+    color: white;
+    margin-bottom: 0.5rem;
+    font-size: 1.35rem;
 }

@@ -3,6 +3,8 @@ export namespace domain {
 	export class Todo {
 	    id: string;
 	    title: string;
+	    date: string;
+	    time: string;
 	    // Go type: time
 	    active_at: any;
 	    status: boolean;
@@ -15,6 +17,8 @@ export namespace domain {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.title = source["title"];
+	        this.date = source["date"];
+	        this.time = source["time"];
 	        this.active_at = this.convertValues(source["active_at"], null);
 	        this.status = source["status"];
 	    }

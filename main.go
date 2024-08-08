@@ -1,16 +1,23 @@
 package main
 
 import (
+	"context"
 	"embed"
+	"encoding/json"
+	"log"
+	"myproject/backend/domain"
+	"myproject/backend/repository"
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"log"
-	"myproject/backend/repository"
-	"net/http"
 )
 
 //go:embed all:frontend/dist
@@ -32,14 +39,93 @@ func main() {
 	}
 
 	repo := repository.NewRepository(db)
-
-	// Create an instance of the app structure
 	app := NewApp(repo)
 
-	// Set up HTTP server
-	httpRouter := NewRouter(app)
+	r := chi.NewRouter()
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5174"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type"},
+	})
+
+	r.Use(c.Handler)
+
+	r.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		todo, err := app.GetTodoByID(r.Context(), id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		json.NewEncoder(w).Encode(todo)
+	})
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		todos, err := app.GetAllTodos(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(todos)
+	})
+
+	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+		var todo domain.Todo
+		if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		createdTodo, err := app.CreateTodo(r.Context(), todo.Title, todo.Date, todo.Time)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(createdTodo)
+	})
+
+	r.Put("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		var todo domain.Todo
+		if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		updatedTodo, err := app.UpdateTodo(r.Context(), id, todo.Title, todo.Date, todo.Time)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(updatedTodo)
+	})
+
+	r.Put("/check/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		if err := app.CheckTodo(r.Context(), id); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	r.Delete("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		if err := app.DeleteTodo(r.Context(), id); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
 	go func() {
-		log.Fatal(http.ListenAndServe(":8080", httpRouter))
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Error starting server: %s", err.Error())
+		}
 	}()
 
 	// Create application with options
@@ -60,7 +146,14 @@ func main() {
 	if err != nil {
 		println("Error:", err.Error())
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server forced to shut down: %s", err.Error())
+	}
 }
+
 func initConfig() error {
 	viper.AddConfigPath("config")
 	viper.SetConfigName("config")
@@ -84,12 +177,14 @@ func initDB() (*sqlx.DB, error) {
 
 func createTables(db *sqlx.DB) error {
 	query := `
-	CREATE TABLE IF NOT EXISTS todos (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		title VARCHAR(255) NOT NULL,
-	    active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		status BOOLEAN DEFAULT FALSE
-	);`
+    CREATE TABLE IF NOT EXISTS todos (
+        id UUID PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        date DATE,
+        time TIME,
+        active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status BOOLEAN DEFAULT FALSE
+    );`
 	_, err := db.Exec(query)
 	return err
 }

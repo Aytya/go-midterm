@@ -12,7 +12,7 @@ type Todo interface {
 	GetAll(ctx context.Context) ([]*domain.Todo, error)
 	Update(ctx context.Context, todo *domain.Todo) error
 	Delete(ctx context.Context, id string) error
-	CheckedTodo(id string) error
+	CheckTodo(ctx context.Context, id string) error
 }
 
 type Repository struct {

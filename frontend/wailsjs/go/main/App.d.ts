@@ -3,7 +3,9 @@
 import {context} from '../models';
 import {domain} from '../models';
 
-export function CreateTodo(arg1:context.Context,arg2:string):Promise<domain.Todo>;
+export function CheckTodo(arg1:context.Context,arg2:string):Promise<void>;
+
+export function CreateTodo(arg1:context.Context,arg2:string,arg3:string,arg4:string):Promise<domain.Todo>;
 
 export function DeleteTodo(arg1:context.Context,arg2:string):Promise<void>;
 
@@ -11,4 +13,4 @@ export function GetAllTodos(arg1:context.Context):Promise<Array<domain.Todo>>;
 
 export function GetTodoByID(arg1:context.Context,arg2:string):Promise<domain.Todo>;
 
-export function UpdateTodo(arg1:context.Context,arg2:domain.Todo):Promise<void>;
+export function UpdateTodo(arg1:context.Context,arg2:string,arg3:string,arg4:string,arg5:string):Promise<domain.Todo>;
