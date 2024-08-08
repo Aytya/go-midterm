@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 export const EditTodoForm = ({ updateTodo, task }) => {
     const [title, setTitle] = useState(task.title);
     const [date, setDate] = useState(task.date ? task.date.split('T')[0] : '');
-    const [time, setTime] = useState(task.time ? task.time.substring(0, 5) : '');
+    const [time, setTime] = useState(task.time ? task.time.split('T')[1].substring(0, 5) : '');
 
     const handleSubmit = (e) => {
         e.preventDefault();
