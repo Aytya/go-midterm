@@ -50,7 +50,7 @@ func main() {
 
 	r := chi.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"wails://wails.localhost:34115"},
+		AllowedOrigins:   []string{"wails://wails.localhost:34115", "http://localhost:5174"},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Content-Type"},
