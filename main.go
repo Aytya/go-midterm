@@ -4,10 +4,12 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
+	"github.com/joho/godotenv"
 	"log"
 	"myproject/backend/domain"
 	"myproject/backend/repository"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -24,6 +26,11 @@ import (
 var assets embed.FS
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %s", err)
+	}
+
 	if err := initConfig(); err != nil {
 		log.Fatalf("Error initializing config: %s", err.Error())
 	}
@@ -161,11 +168,11 @@ func initConfig() error {
 }
 
 func initDB() (*sqlx.DB, error) {
-	dsn := "host=" + viper.GetString("database.host") +
-		" port=" + viper.GetString("database.port") +
-		" user=" + viper.GetString("database.user") +
-		" password=" + viper.GetString("database.password") +
-		" dbname=" + viper.GetString("database.dbname") +
+	dsn := "host=" + os.Getenv("DB_HOST") +
+		" port=" + os.Getenv("DB_PORT") +
+		" user=" + os.Getenv("DB_USER") +
+		" password=" + os.Getenv("DB_PASSWORD") +
+		" dbname=" + os.Getenv("DB_NAME") +
 		" sslmode=disable"
 
 	db, err := sqlx.Connect("postgres", dsn)
