@@ -17,10 +17,9 @@ func NewTodoRepository(db *sqlx.DB) *TodoRepository {
 }
 
 func (repo *TodoRepository) Create(ctx context.Context, todo *domain.Todo) error {
-	query := `INSERT INTO todos (id, title, date, time, active_at, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
-	log.Printf("Executing query: %s with values id: %s, title: %s, date: %s, time: %s, active_at: %s, status: %v", query, todo.ID, todo.Title, todo.Date, todo.Time, todo.ActiveAt, todo.Status)
+	query := `INSERT INTO todos (id, title, date, time, active_at, status, priority) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
 	var id string
-	err := repo.db.QueryRowContext(ctx, query, todo.ID, todo.Title, todo.Date, todo.Time, todo.ActiveAt, todo.Status).Scan(&id)
+	err := repo.db.QueryRowContext(ctx, query, todo.ID, todo.Title, todo.Date, todo.Time, todo.ActiveAt, todo.Status, todo.Priority).Scan(&id)
 	if err != nil {
 		log.Printf("Error executing query: %s, error: %v", query, err)
 		return fmt.Errorf("failed to create todo: %w", err)
@@ -51,8 +50,8 @@ func (repo TodoRepository) GetByID(ctx context.Context, id string) (*domain.Todo
 }
 
 func (repo *TodoRepository) Update(ctx context.Context, todo *domain.Todo) error {
-	query := `UPDATE todos SET title = $2, date = $3, time = $4 WHERE id = $1`
-	_, err := repo.db.ExecContext(ctx, query, todo.ID, todo.Title, todo.Date, todo.Time)
+	query := `UPDATE todos SET title = $2, date = $3, time = $4, priority = $5 WHERE id = $1`
+	_, err := repo.db.ExecContext(ctx, query, todo.ID, todo.Title, todo.Date, todo.Time, todo.Priority)
 	if err != nil {
 		return fmt.Errorf("failed to update todo: %w", err)
 	}

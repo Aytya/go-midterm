@@ -4,6 +4,7 @@ export const TodoForm = ({addTodo}) => {
     const [title, setTitle] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
+    const [priority, setPriority] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -11,10 +12,12 @@ export const TodoForm = ({addTodo}) => {
             title: title.trim(),
             date,
             time,
+            priority
         });
         setTitle('');
         setDate('');
         setTime('');
+        setPriority('');
     };
 
     return (
@@ -38,6 +41,15 @@ export const TodoForm = ({addTodo}) => {
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
             />
+            <select
+                className="todo-input-priority"
+                value={priority}
+                onChange={e => setPriority(e.target.value)}>
+                <option value="">Select Priority</option>
+                <option className="priority-high" value="High">High</option>
+                <option className="priority-medium" value="Medium">Medium</option>
+                <option className="priority-low" value="Low">Low</option>
+            </select>
             <button type='submit' className='todo-btn'>
                 Add Task
             </button>

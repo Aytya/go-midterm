@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Todo } from "./Todo";
 import { EditTodoForm } from "./EditTodoForm";
 import { domain } from "../../wailsjs/go/models.ts";
-import {Modal} from './Modal'; // Ensure you import the Modal component
+import {Modal} from './Modal';
 
 export const TodoWrapper = () => {
     const [todos, setTodos] = useState([]);
@@ -40,17 +40,10 @@ export const TodoWrapper = () => {
         fetchTodos();
     }, []);
 
-    const addTodo = async ({ title, date, time }) => {
-        if (!title.trim()) {
-            setModalMessage("Please enter a todo title!");
+    const addTodo = async ({ title, date, time, priority }) => {
+        if (!title.trim() || !date.trim() || !time.trim() || !['High', 'Medium', 'Low'].includes(priority)) {
+            setModalMessage("Validation failed: fields cannot be empty !");
             setModalVisible(true);
-            return;
-        }
-
-        if (!date.trim() || !time.trim()) {
-            setModalMessage("Please enter both a date and a time for the todo!");
-            setModalVisible(true);
-            return;
         }
 
         const newTodo = {
@@ -59,7 +52,8 @@ export const TodoWrapper = () => {
             date,
             time,
             active_at: new Date().toISOString(),
-            status: false
+            status: false,
+            priority
         };
 
         try {
@@ -107,14 +101,19 @@ export const TodoWrapper = () => {
         }
     };
 
-    const updateTodo = async (id, title, date, time) => {
+    const updateTodo = async (id, title, date, time, priority) => {
+        if (!title.trim() || !date.trim() || !time.trim() || !['High', 'Medium', 'Low'].includes(priority)) {
+            setModalMessage("Validation failed: fields cannot be empty !");
+            setModalVisible(true);
+        }
+
         try {
             const response = await fetch(`http://localhost:8080/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ title, date, time }),
+                body: JSON.stringify({ title, date, time, priority }),
             });
             const updatedTodo = await response.json();
             setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo));
@@ -124,9 +123,13 @@ export const TodoWrapper = () => {
         }
     };
 
+    const sortTodosByPriority = (todos) => {
+        const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
+        return todos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    };
 
-    const activeTodos = todos.filter(todo => !todo.status);
-    const completedTodos = todos.filter(todo => todo.status);
+    const activeTodos = sortTodosByPriority(todos.filter(todo => !todo.status));
+    const completedTodos = sortTodosByPriority(todos.filter(todo => todo.status));
 
     return (
         <div className='TodoWrapper'>

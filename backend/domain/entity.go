@@ -9,4 +9,5 @@ type Todo struct {
 	Time     string    `db:"time" json:"time"`
 	ActiveAt time.Time `db:"active_at" json:"active_at"`
 	Status   bool      `db:"status" json:"status"`
+	Priority string    `db:"priority" json:"priority"`
 }

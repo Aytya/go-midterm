@@ -8,6 +8,7 @@ export namespace domain {
 	    // Go type: time
 	    active_at: any;
 	    status: boolean;
+	    priority: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Todo(source);
@@ -21,6 +22,7 @@ export namespace domain {
 	        this.time = source["time"];
 	        this.active_at = this.convertValues(source["active_at"], null);
 	        this.status = source["status"];
+	        this.priority = source["priority"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

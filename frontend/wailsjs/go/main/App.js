@@ -6,8 +6,8 @@ export function CheckTodo(arg1, arg2) {
   return window['go']['main']['App']['CheckTodo'](arg1, arg2);
 }
 
-export function CreateTodo(arg1, arg2, arg3, arg4) {
-  return window['go']['main']['App']['CreateTodo'](arg1, arg2, arg3, arg4);
+export function CreateTodo(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['CreateTodo'](arg1, arg2, arg3, arg4, arg5);
 }
 
 export function DeleteTodo(arg1, arg2) {
@@ -22,6 +22,6 @@ export function GetTodoByID(arg1, arg2) {
   return window['go']['main']['App']['GetTodoByID'](arg1, arg2);
 }
 
-export function UpdateTodo(arg1, arg2, arg3, arg4, arg5) {
-  return window['go']['main']['App']['UpdateTodo'](arg1, arg2, arg3, arg4, arg5);
+export function UpdateTodo(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['main']['App']['UpdateTodo'](arg1, arg2, arg3, arg4, arg5, arg6);
 }

@@ -37,8 +37,12 @@ func main() {
 
 	db, err := initDB()
 	if err != nil {
-		log.Fatalf("Error initializing database: %s", err.Error())
+		log.Fatalf("Error initializing database: %s", err)
 	}
+	if db == nil {
+		log.Fatal("Database connection is nil")
+	}
+
 	defer db.Close()
 
 	if err := createTables(db); err != nil {
@@ -83,7 +87,7 @@ func main() {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		createdTodo, err := app.CreateTodo(r.Context(), todo.Title, todo.Date, todo.Time)
+		createdTodo, err := app.CreateTodo(r.Context(), todo.Title, todo.Date, todo.Time, todo.Priority)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -98,7 +102,7 @@ func main() {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		updatedTodo, err := app.UpdateTodo(r.Context(), id, todo.Title, todo.Date, todo.Time)
+		updatedTodo, err := app.UpdateTodo(r.Context(), id, todo.Title, todo.Date, todo.Time, todo.Priority)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -168,10 +172,6 @@ func initConfig() error {
 }
 
 func initDB() (*sqlx.DB, error) {
-	if os.Getenv("BUILD_MODE") == "true" {
-		// Skip database initialization during build
-		return nil, nil
-	}
 
 	dsn := "host=" + os.Getenv("DB_HOST") +
 		" port=" + os.Getenv("DB_PORT") +
@@ -194,6 +194,7 @@ func createTables(db *sqlx.DB) error {
         title VARCHAR(255) NOT NULL,
         date DATE,
         time TIME,
+        priority VARCHAR(255) NOT NULL,
         active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         status BOOLEAN DEFAULT FALSE
     );`

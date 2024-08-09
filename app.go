@@ -29,13 +29,12 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func (a *App) CreateTodo(ctx context.Context, title, date, todoTime string) (*domain.Todo, error) {
-	log.Printf("Creating todo with title: %s, date: %s, time: %s", title, date, todoTime)
+func (a *App) CreateTodo(ctx context.Context, title, date, todoTime, priority string) (*domain.Todo, error) {
 	if title == "" {
 		log.Println("Error: Title is empty")
 		return nil, errors.New("title cannot be empty")
 	}
-	if date == "" || todoTime == "" {
+	if date == "" || todoTime == "" || priority == "" {
 		log.Println("Error: Date or time is empty")
 		return nil, errors.New("date and time cannot be empty")
 	}
@@ -50,6 +49,7 @@ func (a *App) CreateTodo(ctx context.Context, title, date, todoTime string) (*do
 		Time:     todoTime,
 		ActiveAt: activeAt,
 		Status:   false,
+		Priority: priority,
 	}
 
 	err := a.todoRepository.Create(ctx, todo)
@@ -60,22 +60,22 @@ func (a *App) CreateTodo(ctx context.Context, title, date, todoTime string) (*do
 	return todo, nil
 }
 
-func (a *App) UpdateTodo(ctx context.Context, id, title, date, todoTime string) (*domain.Todo, error) {
-	log.Printf("Updating todo with ID: %s, title: %s, date: %s, time: %s", id, title, date, todoTime)
+func (a *App) UpdateTodo(ctx context.Context, id, title, date, todoTime, priority string) (*domain.Todo, error) {
 	if title == "" {
 		log.Println("Error: Title is empty")
 		return nil, errors.New("title cannot be empty")
 	}
-	if date == "" || todoTime == "" {
+	if date == "" || todoTime == "" || priority == "" {
 		log.Println("Error: Date or time is empty")
 		return nil, errors.New("date and time cannot be empty")
 	}
 
 	todo := &domain.Todo{
-		ID:    id,
-		Title: title,
-		Date:  date,
-		Time:  todoTime,
+		ID:       id,
+		Title:    title,
+		Date:     date,
+		Time:     todoTime,
+		Priority: priority,
 	}
 
 	err := a.todoRepository.Update(ctx, todo)

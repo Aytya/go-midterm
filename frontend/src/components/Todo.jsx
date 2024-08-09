@@ -23,7 +23,7 @@ export const Todo = ({ task, toggleComplete, deleteTodo, updateTodo, isCompleted
     };
 
     return (
-        <div className={`Todo ${isCompleted ? 'completed-task' : ''}`}>
+        <div className={`Todo ${isCompleted ? 'completed-task' : '' } priority-${task.priority.toLowerCase()}`}>
             <p
                 onClick={() => toggleComplete(task.id)}
                 className={task.status ? 'completed' : 'incompleted'}>
