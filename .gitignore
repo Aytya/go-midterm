@@ -1,4 +1,4 @@
-build/bin
 node_modules
+build/bin
 frontend/dist
 /.env
