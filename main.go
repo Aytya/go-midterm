@@ -16,7 +16,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
-	"github.com/spf13/viper"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -31,18 +30,10 @@ func main() {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
 
-	if err := initConfig(); err != nil {
-		log.Fatalf("Error initializing config: %s", err.Error())
-	}
-
 	db, err := initDB()
 	if err != nil {
 		log.Fatalf("Error initializing database: %s", err)
 	}
-	if db == nil {
-		log.Fatal("Database connection is nil")
-	}
-
 	defer db.Close()
 
 	if err := createTables(db); err != nil {
@@ -163,12 +154,6 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shut down: %s", err.Error())
 	}
-}
-
-func initConfig() error {
-	viper.AddConfigPath("config")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }
 
 func initDB() (*sqlx.DB, error) {
