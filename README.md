@@ -46,7 +46,8 @@
     {
        "title": "Получить работу",
        "date":"12/12/12",
-       "time":"12:30"
+       "time":"12:30",
+       "priority":"high"
     }
  ```
 - Response Body:
@@ -55,8 +56,10 @@
        "id":"cbb255c3-5f79-4da6-8669-70ebde53e1f6",
        "title":"Получить работу",
        "date":"12/12/12",
-       "time":"12:30","active_at":"2024-08-08T17:05:09.228715+05:00",
-       "status":false
+       "time":"12:30",
+       "active_at":"2024-08-08T17:05:09.228715+05:00",
+       "status":false,
+       "priority":"high"
     }
  ```
 ### Update an Existing Task:
@@ -65,7 +68,10 @@
 - Request Body:
  ```bash
     {
-       "title": "Купить квартиру 1"
+        "title": "Получить работу",
+        "date":"12/12/12",
+        "time":"12:30",
+        "priority":"hign"
     }
  ```
 ### Delete an Existing Task:
