@@ -1,26 +1,36 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 
 export const EditTodoForm = ({ updateTodo, task }) => {
-    const [title, setTitle] = useState(task?.title || '');
-    const [date, setDate] = useState(task?.date ? task.date.split('T')[0] : '');
-    const [time, setTime] = useState(() => {
-        const timePart = task?.time ? task.time.substring(0, 5) : '';
-        return timePart;
-    });
-    const [priority, setPriority] = useState(task?.priority);
+    const [title, setTitle] = useState('');
+    const [dateTime, setDateTime] = useState('');
+    const [priority, setPriority] = useState('');
 
     useEffect(() => {
-        setTitle(task?.title || '');
-        setDate(task?.date ? task.date.split('T')[0] : '');
-        setTime(task?.time && task.time.includes('T') ? task.time.split('T')[1].substring(0, 5) : '');
-        setPriority(task?.priority);
+        if (task) {
+            setTitle(task.title || '');
+            const localDateTime = new Date(task.datetime).toLocaleString('sv-SE').replace(' ', 'T');
+            setDateTime(localDateTime || '');
+            setPriority(task.priority || '');
+        }
     }, [task]);
 
-    const handleSubmit = (e) => {
+    const handleDateChange = (e) => {
+        const newDate = e.target.value;
+        const time = dateTime.split('T')[1] || '00:00:00';
+        setDateTime(`${newDate}T${time}`);
+    };
+
+    const handleTimeChange = (e) => {
+        const newTime = `${e.target.value}:00`;
+        const date = dateTime.split('T')[0] || '';
+        setDateTime(`${date}T${newTime}`);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        updateTodo(task.id, title, date, time, priority);
 
-
+        const isoDateTime = new Date(dateTime).toISOString();
+        updateTodo(task.id, title, isoDateTime, priority);
     };
 
     return (
@@ -35,25 +45,27 @@ export const EditTodoForm = ({ updateTodo, task }) => {
             <input
                 type='date'
                 className='todo-input-data'
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                value={dateTime.split('T')[0]}
+                onChange={handleDateChange}
             />
             <input
                 type='time'
                 className='todo-input-time'
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
+                value={dateTime.split('T')[1]?.substring(0, 5) || ''}
+                onChange={handleTimeChange}
             />
             <select
                 className="todo-input-priority"
                 value={priority}
-                onChange={e => setPriority(e.target.value)}>
+                onChange={(e) => setPriority(e.target.value)}>
                 <option value="">Select Priority</option>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
             </select>
-            <button type='submit' className='todo-btn'>Update Task</button>
+            <button type='submit' className='todo-btn'>
+                Update Task
+            </button>
         </form>
     );
 };

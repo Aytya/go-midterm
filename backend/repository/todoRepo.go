@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"log"
 	"myproject/backend/domain"
+	"time"
 )
 
 type TodoRepository struct {
@@ -16,16 +16,18 @@ func NewTodoRepository(db *sqlx.DB) *TodoRepository {
 	return &TodoRepository{db}
 }
 
+const (
+	RFC3339 = "2006-01-02T15:04:05Z07:00"
+)
+
 func (repo *TodoRepository) Create(ctx context.Context, todo *domain.Todo) error {
-	query := `INSERT INTO todos (id, title, date, time, active_at, status, priority) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
+	query := `INSERT INTO todos (id, title, datetime, active_at, status, priority) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
 	var id string
-	err := repo.db.QueryRowContext(ctx, query, todo.ID, todo.Title, todo.Date, todo.Time, todo.ActiveAt, todo.Status, todo.Priority).Scan(&id)
+	err := repo.db.QueryRowContext(ctx, query, todo.ID, todo.Title, todo.DateTime.Format(RFC3339), todo.ActiveAt, todo.Status, todo.Priority).Scan(&id)
 	if err != nil {
-		log.Printf("Error executing query: %s, error: %v", query, err)
 		return fmt.Errorf("failed to create todo: %w", err)
 	}
 	todo.ID = id
-	log.Printf("Created todo with ID: %s", id)
 	return nil
 }
 
@@ -50,8 +52,8 @@ func (repo TodoRepository) GetByID(ctx context.Context, id string) (*domain.Todo
 }
 
 func (repo *TodoRepository) Update(ctx context.Context, todo *domain.Todo) error {
-	query := `UPDATE todos SET title = $2, date = $3, time = $4, priority = $5 WHERE id = $1`
-	_, err := repo.db.ExecContext(ctx, query, todo.ID, todo.Title, todo.Date, todo.Time, todo.Priority)
+	query := `UPDATE todos SET title = $2, datetime = $3, priority = $4 WHERE id = $1`
+	_, err := repo.db.ExecContext(ctx, query, todo.ID, todo.Title, todo.DateTime.Format(time.RFC3339), todo.Priority)
 	if err != nil {
 		return fmt.Errorf("failed to update todo: %w", err)
 	}
@@ -78,9 +80,4 @@ func (repo TodoRepository) Delete(ctx context.Context, id string) error {
 		return fmt.Errorf("failed to delete todo: %w", err)
 	}
 	return nil
-}
-
-func (repo TodoRepository) CheckedTodo(id string) error {
-	//TODO implement me
-	panic("implement me")
 }

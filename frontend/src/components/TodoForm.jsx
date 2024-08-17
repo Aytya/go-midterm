@@ -8,12 +8,15 @@ export const TodoForm = ({addTodo}) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        addTodo({
+
+        const dateTime = new Date(`${date}T${time}:00`).toISOString();
+        const newTodo = {
             title: title.trim(),
-            date,
-            time,
-            priority
-        });
+            datetime: dateTime,
+            priority: priority
+        };
+        console.log(dateTime);
+        addTodo(newTodo);
         setTitle('');
         setDate('');
         setTime('');

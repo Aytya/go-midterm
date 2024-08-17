@@ -1,25 +1,28 @@
 import React from 'react';
 
 export const Todo = ({ task, toggleComplete, deleteTodo, updateTodo, isCompleted }) => {
-
-    const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
+    const formatDate = (dateTimeString) => {
+        const date = new Date(dateTimeString);
+        if (isNaN(date)) {
+            return "Invalid Date";
+        }
+        return date.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
     };
 
-    const formatTime = (timeString) => {
-        if (timeString.startsWith("0000-01-01T")) {
-            timeString = timeString.replace("0000-01-01T", "");
+    const formatTime = (dateTimeString) => {
+        const date = new Date(dateTimeString);
+        if (isNaN(date)) {
+            return "Invalid Time";
         }
-        if (timeString.endsWith(":00Z")) {
-            timeString = timeString.replace(":00Z", "");
-        }
-
-        const [hours, minutes] = timeString.split(':');
-        const date = new Date();
-        date.setHours(hours, minutes);
-        const options = { hour: '2-digit', minute: '2-digit', hour12: true };
-        return date.toLocaleTimeString(undefined, options);
+        return date.toLocaleTimeString(undefined, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+        });
     };
 
     return (
@@ -30,8 +33,8 @@ export const Todo = ({ task, toggleComplete, deleteTodo, updateTodo, isCompleted
                 {task.title}
             </p>
             <div>
-                <span>{formatDate(task.date)}</span>
-                <span>{formatTime(task.time)}</span>
+                <span>{formatDate(task.datetime)}</span>
+                <span>{formatTime(task.datetime)}</span>
                 <img
                     className="fa-pen"
                     src="https://static-00.iconduck.com/assets.00/edit-icon-1022x1024-kes437mc.png"

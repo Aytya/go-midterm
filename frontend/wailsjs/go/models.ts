@@ -3,10 +3,8 @@ export namespace domain {
 	export class Todo {
 	    id: string;
 	    title: string;
-	    date: string;
-	    time: string;
-	    // Go type: time
-	    active_at: any;
+	    datetime: time.Time;
+	    active_at: time.Time;
 	    status: boolean;
 	    priority: string;
 	
@@ -18,9 +16,8 @@ export namespace domain {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.title = source["title"];
-	        this.date = source["date"];
-	        this.time = source["time"];
-	        this.active_at = this.convertValues(source["active_at"], null);
+	        this.datetime = this.convertValues(source["datetime"], time.Time);
+	        this.active_at = this.convertValues(source["active_at"], time.Time);
 	        this.status = source["status"];
 	        this.priority = source["priority"];
 	    }
@@ -42,6 +39,23 @@ export namespace domain {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace time {
+	
+	export class Time {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new Time(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
 	}
 
 }

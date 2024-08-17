@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { TodoForm } from "./TodoForm.jsx";
-import { v4 as uuidv4 } from 'uuid';
 import { Todo } from "./Todo";
 import { EditTodoForm } from "./EditTodoForm";
 import { domain } from "../../wailsjs/go/models.ts";
-import {Modal} from './Modal';
+import { Modal } from './Modal';
+import { CreateTodo, CheckTodo, UpdateTodo, GetAllTodos, DeleteTodo } from "../../wailsjs/go/handler/App";
 
 export const TodoWrapper = () => {
     const [todos, setTodos] = useState([]);
@@ -12,27 +12,16 @@ export const TodoWrapper = () => {
     const [modalMessage, setModalMessage] = useState("");
 
     const fetchTodos = async () => {
+        console.log("GetAllTodos handler:", GetAllTodos);
         try {
-            const response = await fetch('http://localhost:8080');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const fetchedTodos = await response.json();
-            console.log('Fetched todos:', fetchedTodos);
-
-            if (!fetchedTodos) {
-                throw new Error('Fetched todos is undefined');
-            }
-
-            if (!Array.isArray(fetchedTodos)) {
-                throw new Error('Fetched todos is not an array');
-            }
-
-            const todoObjects = fetchedTodos.map(todo => domain.Todo.createFrom(todo));
-            console.log('Fetched todos (processed):', todoObjects);
-            setTodos(todoObjects);
+            const fetchedTodos = await GetAllTodos();
+            setTodos(fetchedTodos.map(todo => {
+                return domain.Todo.createFrom(todo);
+            }));
         } catch (error) {
             console.error('Error fetching todos:', error);
+            setModalMessage(`Error fetching todos: ${error.message}`);
+            setModalVisible(true);
         }
     };
 
@@ -40,90 +29,73 @@ export const TodoWrapper = () => {
         fetchTodos();
     }, []);
 
-    const addTodo = async ({ title, date, time, priority }) => {
-        if (!title.trim() || !date.trim() || !time.trim() || !['High', 'Medium', 'Low'].includes(priority)) {
-            setModalMessage("Validation failed: fields cannot be empty !");
+    const addTodo = async ({ title, priority, datetime }) => {
+        if (!title.trim() || !datetime || !['High', 'Medium', 'Low'].includes(priority)) {
+            setModalMessage("Validation failed: fields cannot be empty!");
             setModalVisible(true);
+            return;
         }
 
-        const newTodo = {
-            id: uuidv4(),
-            title: title.trim(),
-            date,
-            time,
-            active_at: new Date().toISOString(),
-            status: false,
-            priority
-        };
-
         try {
-            const response = await fetch('http://localhost:8080/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newTodo),
-            });
-            const createdTodo = await response.json();
-            setTodos([...todos, domain.Todo.createFrom(createdTodo)]);
+            const createdTodo = await CreateTodo(title.trim(), priority, datetime);
+            setTodos(prevTodos => [...prevTodos, createdTodo]);
         } catch (error) {
             console.error('Error creating todo:', error);
+            setModalMessage(`Error creating todo: ${error.message}`);
+            setModalVisible(true);
         }
     };
-
 
     const toggleComplete = async id => {
-        console.log(`Toggling complete status for todo with ID: ${id}`);
         try {
-            await fetch(`http://localhost:8080/check/${id}`, {
-                method: 'PUT',
-            });
+            await CheckTodo(id);
             setTodos(todos.map(todo => todo.id === id ? { ...todo, status: !todo.status } : todo));
-            console.log(`Todo with ID ${id} status toggled successfully.`);
         } catch (error) {
             console.error('Error toggling complete status:', error);
+            setModalMessage(`Error toggling complete status: ${error.message}`);
+            setModalVisible(true);
         }
     };
 
-    const deleteTodo = async (id) => {
+    const deleteTodo = async id => {
         try {
-            const response = await fetch(`http://localhost:8080/${id}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            setTodos(todos.filter((todo) => todo.id !== id));
+            await DeleteTodo(id);
+            setTodos(todos.filter(todo => todo.id !== id));
             setModalMessage("Well done! You're one step closer to becoming better 🎉");
             setModalVisible(true);
         } catch (error) {
             console.error('Error deleting todo:', error);
+            setModalMessage(`Error deleting todo: ${error.message}`);
+            setModalVisible(true);
         }
     };
 
-    const updateTodo = async (id, title, date, time, priority) => {
-        if (!title.trim() || !date.trim() || !time.trim() || !['High', 'Medium', 'Low'].includes(priority)) {
-            setModalMessage("Validation failed: fields cannot be empty !");
+    const updateTodo = async (id, title, datetime, priority) => {
+        if (!title.trim() || !datetime || !['High', 'Medium', 'Low'].includes(priority)) {
+            setModalMessage("Validation failed: fields cannot be empty!");
             setModalVisible(true);
+            return;
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ title, date, time, priority }),
+            console.log("Updating Todo with data:", { id, title, priority, datetime });
+            await UpdateTodo(id, title, priority, datetime);
+            const updatedTodo = domain.Todo.createFrom({
+                id,
+                title: title.trim(),
+                priority,
+                datetime,
+                status: false,
             });
-            const updatedTodo = await response.json();
             setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo));
-            console.log(`Todo with ID ${id} updated successfully.`);
         } catch (error) {
             console.error('Error updating todo:', error);
+            setModalMessage(`Error updating todo: ${error.message}`);
+            setModalVisible(true);
         }
     };
 
-    const sortTodosByPriority = (todos) => {
+    const sortTodosByPriority = todos => {
         const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
         return todos.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     };
@@ -136,7 +108,7 @@ export const TodoWrapper = () => {
             <h1>TODO LIST</h1>
             <TodoForm addTodo={addTodo} />
             <h2 className="active-task">Active Tasks</h2>
-            {activeTodos && activeTodos.map((todo) => (
+            {activeTodos && activeTodos.map(todo => (
                 todo.isEditing ? (
                     <EditTodoForm updateTodo={updateTodo} key={todo.id} task={todo} />
                 ) : (
@@ -150,7 +122,7 @@ export const TodoWrapper = () => {
                 )
             ))}
             <h2 className="complete-task">Completed Tasks</h2>
-            {completedTodos && completedTodos.map((todo) => (
+            {completedTodos && completedTodos.map(todo => (
                 todo.isEditing ? (
                     <EditTodoForm updateTodo={updateTodo} key={todo.id} task={todo} />
                 ) : (

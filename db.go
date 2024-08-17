@@ -25,8 +25,7 @@ func createTables(db *sqlx.DB) error {
     CREATE TABLE IF NOT EXISTS todos (
         id UUID PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
-        date DATE,
-        time TIME,
+        datetime TIMESTAMPTZ,
         priority VARCHAR(255) NOT NULL,
         active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         status BOOLEAN DEFAULT FALSE
