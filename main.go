@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -25,11 +24,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error initializing database: %s", err)
 	}
-	defer db.Close()
-
-	if err := createTables(db); err != nil {
-		log.Fatalf("Error creating tables: %s", err.Error())
-	}
+	//defer db.Close()
+	//
+	//if err := createTables(db); err != nil {
+	//	log.Fatalf("Error creating tables: %s", err.Error())
+	//}
 
 	repo := repository.NewRepository(db)
 	app := handler.NewApp(repo)
