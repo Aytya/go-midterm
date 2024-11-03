@@ -5,6 +5,7 @@ import { EditTodoForm } from "./EditTodoForm";
 import { domain } from "../../wailsjs/go/models.ts";
 import { Modal } from './Modal';
 import { CreateTodo, CheckTodo, UpdateTodo, GetAllTodos, DeleteTodo } from "../../wailsjs/go/handler/App";
+import {PriorityInfo} from "./PriorityInfo";
 
 export const TodoWrapper = () => {
     const [todos, setTodos] = useState([]);
@@ -142,6 +143,7 @@ export const TodoWrapper = () => {
                     onClose={() => setModalVisible(false)}
                 />
             }
+            <PriorityInfo />
         </div>
     );
 };

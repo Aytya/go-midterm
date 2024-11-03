@@ -24,11 +24,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error initializing database: %s", err)
 	}
-	//defer db.Close()
-	//
-	//if err := createTables(db); err != nil {
-	//	log.Fatalf("Error creating tables: %s", err.Error())
-	//}
 
 	repo := repository.NewRepository(db)
 	app := handler.NewApp(repo)
